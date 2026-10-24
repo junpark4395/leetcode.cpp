@@ -1,59 +1,83 @@
 /**
- * 334. Increasing Triplet Subsequence
+ * 146. LRU Cache
  * Difficulty: Medium
- * Link: https://leetcode.com/problems/increasing-triplet-subsequence/description/
+ * Link: https://leetcode.com/problems/lru-cache/description/
  */
 
 #include <algorithm>
 #include <iostream>
+#include <list>
 #include <print>
 #include <string>
+#include <unordered_map>
 #include <vector>
+#include <deque>
 
 using namespace std;
 
-class Solution {
-public:
-    bool increasingTriplet(vector<int>& nums) {
-        int first = INT_MAX;
-        int second = INT_MAX;
+struct Node {
+    int key;
+    int value;
+};
 
-        for (size_t i = 0; i < nums.size(); i++) {
-            if (nums[i] <= first) {
-                first = nums[i];
-            } else if (nums[i] <= second) {
-                second = nums[i];
-            } else {
-                return true;
-            }
+class LRUCache {
+public:
+    int capacity;
+    list<Node> l;
+    unordered_map<int, list<Node>::iterator> m;
+
+    LRUCache(int capacity) {
+        this->capacity = capacity;
+    }
+
+    int get(int key) {
+        if (m.contains(key)) {
+            l.splice(l.end(), l, m[key]);
+            return m[key]->value;
         }
 
-        return false;
+        return -1;
+    }
+
+    void put(int key, int value) {
+        if (!m.contains(key)) {
+            if (m.size() >= this->capacity) {
+                m.erase((*l.begin()).key);
+                this->l.erase(l.begin());
+            }
+
+            l.push_back({key, value});
+            m[key] = prev(l.end());
+
+        } else {
+            l.splice(l.end(), l, m[key]);
+            m[key]->value = value;
+        }
     }
 };
 
 int main() {
-    Solution sol;
-
     // Example 1
     {
-        vector<int> nums = {1, 2, 3, 4, 5};
-        bool output = sol.increasingTriplet(nums);
-        println("Output: {}, Expected: true", output);
-    }
+        LRUCache lRUCache(2);
+        lRUCache.put(1, 1);
+        lRUCache.put(2, 2);
+        int out1 = lRUCache.get(1);
+        println("get(1) -> Output: {}, Expected: 1", out1);
 
-    // Example 2
-    {
-        vector<int> nums = {5, 4, 3, 2, 1};
-        bool output = sol.increasingTriplet(nums);
-        println("Output: {}, Expected: false", output);
-    }
+        lRUCache.put(3, 3);
+        int out2 = lRUCache.get(2);
+        println("get(2) -> Output: {}, Expected: -1", out2);
 
-    // Example 3
-    {
-        vector<int> nums = {2, 1, 5, 0, 4, 6};
-        bool output = sol.increasingTriplet(nums);
-        println("Output: {}, Expected: true", output);
+        lRUCache.put(4, 4);
+        int out3 = lRUCache.get(1);
+        println("get(1) -> Output: {}, Expected: -1", out3);
+
+        int out4 = lRUCache.get(3);
+        println("get(3) -> Output: {}, Expected: 3", out4);
+
+        int out5 = lRUCache.get(4);
+        println("get(4) -> Output: {}, Expected: 4", out5);
     }
 
     return 0;
