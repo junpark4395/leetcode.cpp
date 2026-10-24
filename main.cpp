@@ -1,83 +1,92 @@
 /**
- * 146. LRU Cache
+ * 56. Merge Intervals
  * Difficulty: Medium
- * Link: https://leetcode.com/problems/lru-cache/description/
+ * Link: https://leetcode.com/problems/merge-intervals/description/
  */
 
 #include <algorithm>
 #include <iostream>
-#include <list>
 #include <print>
 #include <string>
-#include <unordered_map>
 #include <vector>
-#include <deque>
 
 using namespace std;
 
-struct Node {
-    int key;
-    int value;
-};
+/*
+A Simple version
 
-class LRUCache {
+class Solution {
 public:
-    int capacity;
-    list<Node> l;
-    unordered_map<int, list<Node>::iterator> m;
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        ranges::sort(intervals);
 
-    LRUCache(int capacity) {
-        this->capacity = capacity;
-    }
+        vector<vector<int>> answer;
 
-    int get(int key) {
-        if (m.contains(key)) {
-            l.splice(l.end(), l, m[key]);
-            return m[key]->value;
-        }
-
-        return -1;
-    }
-
-    void put(int key, int value) {
-        if (!m.contains(key)) {
-            if (m.size() >= this->capacity) {
-                m.erase((*l.begin()).key);
-                this->l.erase(l.begin());
+        for (const auto& interval : intervals) {
+            if (answer.empty() || answer.back()[1] < interval[0]) {
+                answer.push_back(interval);
             }
-
-            l.push_back({key, value});
-            m[key] = prev(l.end());
-
-        } else {
-            l.splice(l.end(), l, m[key]);
-            m[key]->value = value;
+            else {
+                answer.back()[1] = max(answer.back()[1], interval[1]);
+            }
         }
+
+        return answer;
+    }
+};
+*/
+
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        // actually ranges:;sort(intervals) is working for this
+        ranges::sort(intervals, [](const auto& a, const auto& b) {
+            return a[0] < b[0];
+        });
+
+        vector<vector<int>> answer;
+        int start = intervals[0][0];
+        int finish = intervals[0][1];
+
+        for (size_t i = 1; i < intervals.size(); i++) {
+            if (intervals[i][0] <= finish) {
+                if (intervals[i][1] >= finish) {
+                    finish = intervals[i][1];
+                }
+
+            } else {
+                answer.push_back({start, finish});
+                start = intervals[i][0];
+                finish = intervals[i][1];
+            }
+        }
+
+        answer.push_back({start, finish});
+        return answer;
     }
 };
 
 int main() {
+    Solution sol;
+
     // Example 1
     {
-        LRUCache lRUCache(2);
-        lRUCache.put(1, 1);
-        lRUCache.put(2, 2);
-        int out1 = lRUCache.get(1);
-        println("get(1) -> Output: {}, Expected: 1", out1);
+        vector<vector<int>> intervals = {{1, 3}, {2, 6}, {8, 10}, {15, 18}};
+        vector<vector<int>> output = sol.merge(intervals);
+        println("Output: {}, Expected: [[1, 6], [8, 10], [15, 18]]", output);
+    }
 
-        lRUCache.put(3, 3);
-        int out2 = lRUCache.get(2);
-        println("get(2) -> Output: {}, Expected: -1", out2);
+    // Example 2
+    {
+        vector<vector<int>> intervals = {{1, 4}, {4, 5}};
+        vector<vector<int>> output = sol.merge(intervals);
+        println("Output: {}, Expected: [[1, 5]]", output);
+    }
 
-        lRUCache.put(4, 4);
-        int out3 = lRUCache.get(1);
-        println("get(1) -> Output: {}, Expected: -1", out3);
-
-        int out4 = lRUCache.get(3);
-        println("get(3) -> Output: {}, Expected: 3", out4);
-
-        int out5 = lRUCache.get(4);
-        println("get(4) -> Output: {}, Expected: 4", out5);
+    {
+        vector<vector<int>> intervals = {{1, 4}, {2, 3}, {5, 6}};
+        vector<vector<int>> output = sol.merge(intervals);
+        println("Output: {}, Expected: [[1, 4]]", output);
     }
 
     return 0;
