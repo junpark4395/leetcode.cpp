@@ -1,42 +1,59 @@
 /**
- * 200. Number of Islands
+ * 994. Rotting Oranges
  * Difficulty: Medium
- * Link: https://leetcode.com/problems/number-of-islands/description/
+ * Link: https://leetcode.com/problems/rotting-oranges/description/
  */
 
  /*
- A simple version
-  int numIslands(vector<vector<char>>& grid) {
-    int m = grid.size();
-    int n = grid[0].size();
-    vector<vector<bool>> visited(m, vector<bool>(n, false));
-    int count = 0;
+ A Simple version
+ class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int rows = grid.size();
+        int cols = grid[0].size();
+        queue<pair<int, int>> q;
+        int freshes = 0;
 
-    auto dfs = [&](this auto& self, int x, int y) -> void {
-        visited[y][x] = true;
-        for (int i = 0; i < 4; i++) {
-            int nx = x + dx[i];
-            int ny = y + dy[i];
-            if (nx >= 0 && nx < n && ny >= 0 && ny < m && grid[ny][nx] == '1' && !visited[ny][nx]) {
-                self(nx, ny);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == 2) q.push({i, j});
+                else if (grid[i][j] == 1) freshes++;
             }
         }
-    };
-    for (int y = 0; y < m; y++) {
-        for (int x = 0; x < n; x++) {
-            if (grid[y][x] == '1' && !visited[y][x]) {
-                dfs(x, y);
-                count++;
+
+        int dx[4] = {-1, 0, 1, 0};
+        int dy[4] = {0, 1, 0, -1};
+        int minutes = 0;
+
+        while (!q.empty() && freshes > 0) {
+            int sz = q.size();
+            for (int s = 0; s < sz; s++) {
+                auto [y, x] = q.front();
+                q.pop();
+
+                for (int k = 0; k < 4; k++) {
+                    int ny = y + dy[k];
+                    int nx = x + dx[k];
+
+                    if (nx >= 0 && ny >= 0 && nx < cols && ny < rows && grid[ny][nx] == 1) {
+                        grid[ny][nx] = 2;
+                        freshes--;
+                        q.push({ny, nx});
+                    }
+                }
             }
+            minutes++;
         }
+
+        return freshes == 0 ? minutes : -1;
     }
-    return count;
-}
+};
  */
 
-#include <algorithm>
+ #include <algorithm>
 #include <iostream>
 #include <print>
+#include <queue>
 #include <string>
 #include <vector>
 
@@ -44,39 +61,63 @@ using namespace std;
 
 class Solution {
 public:
-    int dx[4] = {-1, 0, 1, 0};
-    int dy[4] = {0, 1, 0, -1};
+    int orangesRotting(vector<vector<int>>& grid) {
+        int rows = grid.size();
+        int cols = grid[0].size();
 
-    void dfs(vector<vector<bool>>& visited, vector<vector<char>>& grid, int x, int y, int max_x, int max_y) {
-        visited[y][x] = true;
+        int dx[4] = {-1, 0, 1, 0};
+        int dy[4] = {0, 1, 0, -1};
 
-        for (int i = 0; i < 4; i++) {
-            int new_x = x + dx[i];
-            int new_y = y + dy[i];
-
-            if (new_x >= 0 && new_x < max_x && new_y >= 0 && new_y < max_y && grid[new_y][new_x] == '1' && !visited[new_y][new_x]) {
-                dfs(visited, grid, new_x, new_y, max_x, max_y);
+        int min = 0;
+        int freshes = 0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == 1)
+                    freshes++;
             }
         }
-    }
 
-    int numIslands(vector<vector<char>>& grid) {
-        int m = grid.size();
-        int n = grid[0].size();
-        vector<vector<bool>> visited(m, vector<bool>(n, false));
+        while (true) {
+            vector<vector<bool>> m(rows, vector<bool>(cols, false));
 
-        int count = 0;
+            bool has_found = false;
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    if (grid[i][j] == 1 && !m[i][j]) {
+                        for (int k = 0; k < 4; k++) {
+                            int x = j + dx[k];
+                            int y = i + dy[k];
 
-        for (size_t y = 0; y < grid.size(); y++) {
-            for (size_t x = 0; x < grid[y].size(); x++) {
-                if (grid[y][x] == '1' && !visited[y][x]) {
-                    dfs(visited, grid, x, y, n, m);
-                    count++;
+                            if (x >= 0 && y >= 0 && x < cols && y < rows && grid[y][x] == 2) {
+                                has_found = true;
+                                m[i][j] = true;
+                                break;
+                            }
+                        }
+                    }
                 }
             }
+
+            if (!has_found) {
+                if (freshes > 0)
+                    min = -1;
+
+                break;
+            }
+
+            for (int i = 0; i < rows; i++) {
+                for (int j = 0; j < cols; j++) {
+                    if (m[i][j]) {
+                        grid[i][j] = 2;
+                        freshes--;
+                    }
+                }
+            }
+
+            min++;
         }
 
-        return count;
+        return min;
     }
 };
 
@@ -85,26 +126,23 @@ int main() {
 
     // Example 1
     {
-        vector<vector<char>> grid = {
-            {'1', '1', '1', '1', '0'},
-            {'1', '1', '0', '1', '0'},
-            {'1', '1', '0', '0', '0'},
-            {'0', '0', '0', '0', '0'}
-        };
-        int output = sol.numIslands(grid);
-        println("Output: {}, Expected: 1", output);
+        vector<vector<int>> grid = {{2, 1, 1}, {1, 1, 0}, {0, 1, 1}};
+        int output = sol.orangesRotting(grid);
+        println("Output: {}, Expected: 4", output);
     }
 
     // Example 2
     {
-        vector<vector<char>> grid = {
-            {'1', '1', '0', '0', '0'},
-            {'1', '1', '0', '0', '0'},
-            {'0', '0', '1', '0', '0'},
-            {'0', '0', '0', '1', '1'}
-        };
-        int output = sol.numIslands(grid);
-        println("Output: {}, Expected: 3", output);
+        vector<vector<int>> grid = {{2, 1, 1}, {0, 1, 1}, {1, 0, 1}};
+        int output = sol.orangesRotting(grid);
+        println("Output: {}, Expected: -1", output);
+    }
+
+    // Example 3
+    {
+        vector<vector<int>> grid = {{0, 2}};
+        int output = sol.orangesRotting(grid);
+        println("Output: {}, Expected: 0", output);
     }
 
     return 0;
