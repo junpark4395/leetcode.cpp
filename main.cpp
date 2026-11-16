@@ -1,67 +1,66 @@
 /**
- * 22. Generate Parentheses
- * Difficulty: Medium
- * Link: https://leetcode.com/problems/generate-parentheses/description/
+ * 121. Best Time to Buy and Sell Stock
+ * Difficulty: Easy
+ * Link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/
  */
 
 #include <algorithm>
+#include <climits>
+#include <iostream>
 #include <print>
 #include <string>
 #include <vector>
-#include <stack>
 
 using namespace std;
 
 class Solution {
 public:
-    void backtrack(int n, int open, int close, string& s, vector<string>& result) {
-        if (open == n && close == n) {
-            result.push_back(s);
-            return;
+    int maxProfit(vector<int>& prices) {
+        int minPrice = INT_MAX;
+        int profit = 0;
+
+        for (size_t i = 0; i < prices.size(); i++) {
+            int price = prices[i];
+
+            if (minPrice > price) {
+                minPrice = price;
+                continue;
+            }
+
+            profit = max(profit, price - minPrice);
         }
 
-        if (open < n) {
-            s.push_back('(');
-            backtrack(n, open + 1, close, s, result);
-            s.pop_back();
-        }
-
-        if (close < n && close < open) {
-            s.push_back(')');
-            backtrack(n, open, close + 1, s, result);
-            s.pop_back();
-        }
-
-    }
-
-    vector<string> generateParenthesis(int n) {
-        vector<string> result;
-        string s;
-        s.reserve(2 * n);
-
-        backtrack(n, 0, 0, s, result);
-
-        return result;
+        return profit;
     }
 };
 
 int main() {
     Solution sol;
 
+    {
+        vector<int> prices = {2, 1, 2, 0, 1};
+        int output = sol.maxProfit(prices);
+        println("Output: {}, Expected: 1", output);
+    }
+
+    {
+        vector<int> prices = {2, 4, 1};
+        int output = sol.maxProfit(prices);
+        println("Output: {}, Expected: 2", output);
+    }
+
     // Example 1
     {
-        int n = 3;
-        vector<string> output = sol.generateParenthesis(n);
-        println("Output: {}", output);
-        println("Expected: [\"((()))\", \"(()())\", \"(())()\", \"()(())\", \"()()()\"]");
+        vector<int> prices = {7, 1, 5, 3, 6, 4};
+        int output = sol.maxProfit(prices);
+        println("Output: {}, Expected: 5", output);
     }
 
     // Example 2
     {
-        int n = 1;
-        vector<string> output = sol.generateParenthesis(n);
-        println("Output: {}", output);
-        println("Expected: [\"()\"]");
+        vector<int> prices = {7, 6, 4, 3, 1};
+        int output = sol.maxProfit(prices);
+        println("Output: {}, Expected: 0", output);
     }
 
     return 0;
