@@ -1,36 +1,63 @@
 /**
- * 121. Best Time to Buy and Sell Stock
- * Difficulty: Easy
- * Link: https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/
+ * 207. Course Schedule
+ * Difficulty: Medium
+ * Link: https://leetcode.com/problems/course-schedule/description/
  */
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
 #include <print>
+#include <queue>
 #include <string>
 #include <vector>
+#include <array>
 
 using namespace std;
 
 class Solution {
 public:
-    int maxProfit(vector<int>& prices) {
-        int minPrice = INT_MAX;
-        int profit = 0;
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        vector<vector<int>> adjs(numCourses);
+        vector<int> state(numCourses, 0);
 
-        for (size_t i = 0; i < prices.size(); i++) {
-            int price = prices[i];
+        for (size_t i = 0; i < prerequisites.size(); i++) {
+            int target = prerequisites[i][0];
+            int required = prerequisites[i][1];
 
-            if (minPrice > price) {
-                minPrice = price;
-                continue;
-            }
-
-            profit = max(profit, price - minPrice);
+            adjs[required].push_back(target);
         }
 
-        return profit;
+        bool possible = true;
+
+        auto dfs = [&](this auto&& self, int v) -> bool {
+            if (state[v] == 2)
+                return true;
+
+            if (state[v] == 1)
+                return false;
+
+            state[v] = 1;
+
+            for (size_t i = 0; i < adjs[v].size(); i++) {
+                int next = adjs[v][i];
+                if (!self(next)) {
+                    return false;
+                }
+            }
+
+            state[v] = 2;
+            return true;
+        };
+
+        for (int i = 0; i < numCourses; i++) {
+            if (state[i] == 0) {
+                if (!dfs(i)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 };
 
@@ -38,29 +65,40 @@ int main() {
     Solution sol;
 
     {
-        vector<int> prices = {2, 1, 2, 0, 1};
-        int output = sol.maxProfit(prices);
-        println("Output: {}, Expected: 1", output);
+        int numCourses = 5;
+        vector<vector<int>> prerequisites = {{1, 4}, {2, 4}, {3, 1}, {3, 2}};
+        bool output = sol.canFinish(numCourses, prerequisites);
+        println("Output: {}, Expected: true", output);
     }
 
     {
-        vector<int> prices = {2, 4, 1};
-        int output = sol.maxProfit(prices);
-        println("Output: {}, Expected: 2", output);
+        int numCourses = 3;
+        vector<vector<int>> prerequisites = {{1, 0}, {2, 0}, {0, 2}};
+        bool output = sol.canFinish(numCourses, prerequisites);
+        println("Output: {}, Expected: false", output);
     }
 
-    // Example 1
     {
-        vector<int> prices = {7, 1, 5, 3, 6, 4};
-        int output = sol.maxProfit(prices);
-        println("Output: {}, Expected: 5", output);
+        int numCourses = 4;
+        vector<vector<int>> prerequisites = {{1, 0}, {3, 2}};
+        bool output = sol.canFinish(numCourses, prerequisites);
+        println("Output: {}, Expected: true", output);
     }
 
     // Example 2
     {
-        vector<int> prices = {7, 6, 4, 3, 1};
-        int output = sol.maxProfit(prices);
-        println("Output: {}, Expected: 0", output);
+        int numCourses = 2;
+        vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
+        bool output = sol.canFinish(numCourses, prerequisites);
+        println("Output: {}, Expected: false", output);
+    }
+
+    // Example 1
+    {
+        int numCourses = 2;
+        vector<vector<int>> prerequisites = {{1, 0}};
+        bool output = sol.canFinish(numCourses, prerequisites);
+        println("Output: {}, Expected: true", output);
     }
 
     return 0;
