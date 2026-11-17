@@ -1,104 +1,59 @@
 /**
- * 207. Course Schedule
- * Difficulty: Medium
- * Link: https://leetcode.com/problems/course-schedule/description/
+ * 1944. Number of Visible People in a Queue
+ * Difficulty: Hard
+ * Link: https://leetcode.com/problems/number-of-visible-people-in-a-queue/description/
  */
 
 #include <algorithm>
 #include <iostream>
 #include <print>
-#include <queue>
+#include <stack>
 #include <string>
 #include <vector>
-#include <array>
 
 using namespace std;
 
 class Solution {
 public:
-    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        vector<vector<int>> adjs(numCourses);
-        vector<int> state(numCourses, 0);
+    vector<int> canSeePersonsCount(vector<int>& heights) {
+        stack<int> s;
+        vector<int> answer(heights.size(), 0);
 
-        for (size_t i = 0; i < prerequisites.size(); i++) {
-            int target = prerequisites[i][0];
-            int required = prerequisites[i][1];
-
-            adjs[required].push_back(target);
-        }
-
-        bool possible = true;
-
-        auto dfs = [&](this auto&& self, int v) -> bool {
-            if (state[v] == 2)
-                return true;
-
-            if (state[v] == 1)
-                return false;
-
-            state[v] = 1;
-
-            for (size_t i = 0; i < adjs[v].size(); i++) {
-                int next = adjs[v][i];
-                if (!self(next)) {
-                    return false;
-                }
+        for (int i = heights.size() - 1; i >= 0; i--) {
+            int cnt = 0;
+            while(!s.empty() && s.top() <= heights[i]) {
+                cnt++;
+                s.pop();
             }
 
-            state[v] = 2;
-            return true;
-        };
-
-        for (int i = 0; i < numCourses; i++) {
-            if (state[i] == 0) {
-                if (!dfs(i)) {
-                    return false;
-                }
+            if (!s.empty()) {
+                cnt += 1;
             }
+
+            s.push(heights[i]);
+
+            answer[i] = cnt;
         }
 
-        return true;
+        return answer;
     }
 };
 
 int main() {
     Solution sol;
 
+    // Example 1
     {
-        int numCourses = 5;
-        vector<vector<int>> prerequisites = {{1, 4}, {2, 4}, {3, 1}, {3, 2}};
-        bool output = sol.canFinish(numCourses, prerequisites);
-        println("Output: {}, Expected: true", output);
-    }
-
-    {
-        int numCourses = 3;
-        vector<vector<int>> prerequisites = {{1, 0}, {2, 0}, {0, 2}};
-        bool output = sol.canFinish(numCourses, prerequisites);
-        println("Output: {}, Expected: false", output);
-    }
-
-    {
-        int numCourses = 4;
-        vector<vector<int>> prerequisites = {{1, 0}, {3, 2}};
-        bool output = sol.canFinish(numCourses, prerequisites);
-        println("Output: {}, Expected: true", output);
+        vector<int> heights = {10, 6, 8, 5, 11, 9};
+        vector<int> output = sol.canSeePersonsCount(heights);
+        println("Output: {}, Expected: [3, 1, 2, 1, 1, 0]", output);
     }
 
     // Example 2
     {
-        int numCourses = 2;
-        vector<vector<int>> prerequisites = {{1, 0}, {0, 1}};
-        bool output = sol.canFinish(numCourses, prerequisites);
-        println("Output: {}, Expected: false", output);
-    }
-
-    // Example 1
-    {
-        int numCourses = 2;
-        vector<vector<int>> prerequisites = {{1, 0}};
-        bool output = sol.canFinish(numCourses, prerequisites);
-        println("Output: {}, Expected: true", output);
+        vector<int> heights = {5, 1, 2, 3, 10};
+        vector<int> output = sol.canSeePersonsCount(heights);
+        println("Output: {}, Expected: [4, 1, 1, 1, 0]", output);
     }
 
     return 0;
