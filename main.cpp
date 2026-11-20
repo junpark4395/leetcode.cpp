@@ -1,11 +1,10 @@
 /**
- * 152. Maximum Product Subarray
+ * 238. Product of Array Except Self
  * Difficulty: Medium
- * Link: https://leetcode.com/problems/maximum-product-subarray/description/
+ * Link: https://leetcode.com/problems/product-of-array-except-self/description/
  */
 
 #include <algorithm>
-#include <climits>
 #include <iostream>
 #include <print>
 #include <string>
@@ -15,18 +14,20 @@ using namespace std;
 
 class Solution {
 public:
-    int maxProduct(vector<int>& nums) {
+    vector<int> productExceptSelf(vector<int>& nums) {
         int n = (int)nums.size();
-        int dp[20001][2] = {};
-        dp[0][0] = nums[0];
-        dp[0][1] = nums[0];
-        int answer = nums[0];
+        vector<int> left(n, 1);
+        vector<int> right(n, 1);
+        vector<int> answer(n);
 
-        for (int i = 1; i < n; i++) {
-            dp[i][0] = min(min(dp[i - 1][0] * nums[i], dp[i - 1][1] * nums[i]), nums[i]);
-            dp[i][1] = max(max(dp[i - 1][0] * nums[i], dp[i - 1][1] * nums[i]), nums[i]);
+        for (int l = 1; l < n; l++) {
+            int r = n - l - 1;
+            left[l] = left[l - 1] * nums[l - 1];
+            right[r] = right[r + 1] * nums[r + 1];
+        }
 
-            answer = max(answer, dp[i][1]);
+        for (int i = 0; i < n; i++) {
+            answer[i] = left[i] * right[i];
         }
 
         return answer;
@@ -36,24 +37,18 @@ public:
 int main() {
     Solution sol;
 
-    {
-        vector<int> nums = {-2 ,3, -4};
-        int output = sol.maxProduct(nums);
-        println("Output: {}, Expected: 24", output);
-    }
-
     // Example 1
     {
-        vector<int> nums = {2, 3, -2, 4};
-        int output = sol.maxProduct(nums);
-        println("Output: {}, Expected: 6", output);
+        vector<int> nums = {1, 2, 3, 4};
+        vector<int> output = sol.productExceptSelf(nums);
+        println("Output: {}, Expected: [24, 12, 8, 6]", output);
     }
 
     // Example 2
     {
-        vector<int> nums = {-2, 0, -1};
-        int output = sol.maxProduct(nums);
-        println("Output: {}, Expected: 0", output);
+        vector<int> nums = {-1, 1, 0, -3, 3};
+        vector<int> output = sol.productExceptSelf(nums);
+        println("Output: {}, Expected: [0, 0, 9, 0, 0]", output);
     }
 
     return 0;
